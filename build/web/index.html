@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<!--
+To change this license header, choose License Headers in Project Properties.
+To change this template file, choose Tools | Templates
+and open the template in the editor.
+-->
+<html>
+    <head>
+        <title>TODO supply a title</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    </head>
+    <body>
+
+        <h1>Proveedores</h1>
+
+        <table border="1">
+            <thead>
+                <tr>
+                    <th>Ruc</th>
+                    <th>Razon_Social</th>
+                    <th>Rep_legal</th>
+                    <th>direccion</th>
+                    <th>Estado</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody id="proveedores">
+
+            </tbody>
+        </table>
+        
+        <form>
+            <h2>Editar Proveedor</h2>
+            
+            <div>
+                <label for="inputRuc">RUC</label> 
+                <input disabled type="text" id="inputRuc" placeholder="Ingrese RUC">
+            </div>
+            <div>
+                <label for="inputRazon_Social">Razon_Social</label> 
+                <input type="text" id="inputRazon_Social" placeholder="Ingrese Razon_Social">
+            </div>
+            <div>
+                <label for="inputRep_legal">Rep_legal</label> 
+                <input type="text" id="inputRep_legal" placeholder="Ingrese Rep_legal">
+            </div>
+            <div>
+                <label for="inputDireccion">Direccion</label> 
+                <input type="text" id="inputDireccion" placeholder="Ingrese Direccion">
+            </div>
+            <div>
+                <button type="button" onclick="editarProveedor()">GUARDAR</button>
+            </div>
+            
+        </form>
+        
+        <form>
+            <h2>Registrar Proveedor</h2>
+            
+            <div>
+                <label for="insertRuc">RUC</label> 
+                <input type="text" id="insertRuc" placeholder="Ingrese RUC">
+            </div>
+            <div>
+                <label for="insertRazon_Social">Razon_Social</label> 
+                <input type="text" id="insertRazon_Social" placeholder="Ingrese Razon_Social">
+            </div>
+            <div>
+                <label for="insertRep_legal">Rep_legal</label> 
+                <input type="text" id="insertRep_legal" placeholder="Ingrese Rep_legal">
+            </div>
+            <div>
+                <label for="insertDireccion">Direccion</label> 
+                <input type="text" id="insertDireccion" placeholder="Insertar Direccion">
+            </div>
+            <div>
+                <button type="button" onclick="insertarProveedor()">GUARDAR</button>
+            </div>
+            
+        </form>
+
+
+
+
+        <script
+            src="https://code.jquery.com/jquery-3.4.1.min.js"
+            integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo="
+        crossorigin="anonymous"></script>
+
+        <script>
+
+            listarProveedor()
+            function listarProveedor() {
+                $.ajax({
+                url: 'http://localhost:8080/AppProveedor/proveedor',
+                type: 'GET',
+                success: function (data) {
+                    var htmlGenerado = ''
+
+
+                    data.forEach(proveedor => {
+                        var botonEstado = ''
+                        
+                        //Proveedor es 'N' 'Habilitar'
+                        if (proveedor.habilitar == 'Y') {
+                            botinEstado = `
+                            <button onclick="cambiarEstado('N','${proveedor.ruc}')">Inhabilitar</button>`
+                        } else {
+                            botinEstado = `
+                            <button onclick="cambiarEstado('Y','${proveedor.ruc}')">Habilitar</button>`
+                        }
+                        
+                        
+                        // Proveedor en 'Y' 'Inhabilitat'
+                        
+                        
+                        
+                        htmlGenerado += `
+                        <tr>
+                            <td>${proveedor.ruc}</td>
+                            <td>${proveedor.rsocial}</td>
+                            <td>${proveedor.rlegal}</td>
+                            <td>${proveedor.direccion}</td>
+                            <td>${proveedor.habilitar}</td>
+                            <td>
+                            <button onclick="obtenerDetalleProveedor('${proveedor.ruc}')">Detalle</button>    
+                            ${botinEstado}
+                            </td>
+                        </tr>
+                      `
+                    })
+                    var tbody = document.getElementById('proveedores')
+                    tbody.innerHTML = htmlGenerado
+
+                }
+
+            })
+            }
+            
+            function obtenerDetalleProveedor(myRuc){
+                //console.log(myRuc);
+                //direccion: "Paucarpata"
+                //habilitar: "Y"
+                //rlegal: "Arequipa"
+                //rsocial: "Pepito3"
+                //ruc: "20109333159" //
+                $.ajax({
+                    url: `http://localhost:8080/AppProveedor/proveedor?oruc=${myRuc}`,
+                    type: 'GET',
+                    success: function(myRes) {
+                        var inputRuc = document.getElementById('inputRuc');
+                        var inputRazon_Social = document.getElementById('inputRazon_Social');
+                        var inputRep_legal = document.getElementById('inputRep_legal');
+                        var inputDireccion = document.getElementById('inputDireccion');
+                        inputRuc.value = myRes.ruc
+                        inputRazon_Social.value = myRes.rsocial
+                        inputRep_legal.value = myRes.rlegal
+                        inputDireccion.value = myRes.direccion
+                    }
+                })
+            }
+            
+            function editarProveedor() {
+                var inputRuc = document.getElementById('inputRuc');
+                var inputRazon_Social = document.getElementById('inputRazon_Social');
+                var inputRep_legal = document.getElementById('inputRep_legal');
+                var inputDireccion = document.getElementById('inputDireccion');
+                
+                $.ajax({
+                    url: 'http://localhost:8080/AppProveedor/proveedor',
+                    data: JSON.stringify({
+                        ruc: inputRuc.value,
+                        rsocial: inputRazon_Social.value,
+                        rlegal: inputRep_legal.value,
+                        direccion: inputDireccion.value
+                        
+                    }),
+                    
+                    type: 'PUT',
+                    dataType: 'JSON',
+                    success: function(myRes) {
+                        console.log(myRes)
+                        listarProveedor()
+                        limpiarFormularioEditar()
+                        
+                    }
+                    
+                })
+            }
+            
+            function limpiarFormularioEditar() {
+                var inputRuc = document.getElementById('inputRuc');
+                var inputRazon_Social = document.getElementById('inputRazon_Social');
+                var inputRep_legal = document.getElementById('inputRep_legal');
+                var inputDireccion = document.getElementById('inputDireccion');
+                inputRuc.value = ''
+                inputRazon_Social.value = ''
+                inputRep_legal.value = ''
+                inputDireccion.value = ''
+            }
+            
+            
+            function insertarProveedor() {
+                var insertRuc = document.getElementById('insertRuc');
+                var insertRazon_Social = document.getElementById('insertRazon_Social');
+                var insertRep_legal = document.getElementById('insertRep_legal');
+                var insertDireccion = document.getElementById('insertDireccion');
+                
+                $.ajax({
+                    url: 'http://localhost:8080/AppProveedor/proveedor',
+                    data: JSON.stringify({
+                        ruc: insertRuc.value,
+                        rsocial: insertRazon_Social.value,
+                        rlegal: insertRep_legal.value,
+                        direccion: insertDireccion.value
+                        
+                    }),
+                    
+                    type: 'POST',
+                    dataType: 'JSON',
+                    success: function(myRes){
+                        console.log(myRes)
+                        listarProveedor()
+                        
+                    }
+                    
+                })
+            }
+            
+            function cambiarEstado(myEstado, myRuc) {
+                $.ajax ({
+                    url: `http://localhost:8080/AppProveedor/proveedor?ruc=${myRuc}&estado=${myEstado}`,
+                    type: 'DELETE',
+                    success: function() {
+                        console.log(myEstado)
+                        listarProveedor()
+                    }
+                    
+                })
+                
+                
+            }
+        </script>
+
+
+    </body>
+</html>
